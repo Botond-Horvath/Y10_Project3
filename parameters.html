@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .link {
+                text-decoration:none;
+                padding-right:20px;
+                padding-left:20px;
+                padding-top:15px;
+                padding-bottom:15px;
+                background-color:orange;
+                color:black;
+                position:absolute;
+                transition:0.2s;
+                text-align:center;
+                border:1px solid black;
+            }
+            .link:hover {
+                background-color:red;
+                color:white;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Settings for the GPS!</h1>
+        <p>Mode:</p>
+        <input type='radio' id='directions' name='mode' value='directions' checked='checked'/>
+        <label for="directions">directions</label><br>
+        <input type='radio' id='GPS' name='mode' value='GPS'/>
+        <label for="GPS">GPS</label><br>
+        <button onclick="setParameters()">Set!</button>
+        <p id='message' style='display:none'>ALL SET!</p>
+        <a class='link' href="gps.html">Return to main page</a>
+        <script src="parameters.js"></script>
+    </body>
+</html>

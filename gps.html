@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            #map {
+                height:600px;
+                width:100%;
+                margin:0;
+            }
+            #login, #parameters {
+                text-decoration:none;
+                padding-right:20px;
+                padding-left:20px;
+                padding-top:15px;
+                padding-bottom:15px;
+                background-color:orange;
+                color:black;
+                position:absolute;
+                transition:0.2s;
+                text-align:center;
+                border:1px solid black;
+            }
+            #login {
+                top:0;
+                right:0;
+            }
+            #parameters {
+                top:0;
+                right:90px;
+            }
+            #login:hover, #parameters:hover {
+                background-color:red;
+                color:white;
+            }
+            .flex {
+                display:flex;
+                flex-direction:row;
+                align-items:center;
+                justify-content:center;
+            }
+            #inst {
+                text-align:center;
+            }
+            #butt1 {
+                display:none;
+                width:50px;
+                height:50px;
+            }
+            #butt2 {
+                display:none;
+                width:50px;
+                height:50px;
+            }
+            #info {
+                margin:0;
+                color:green;
+            }
+            .startend {
+                color:green;
+            }
+            #add1 {
+                display:none;
+            }
+            #add2 {
+                display:none;
+            }
+            #add3 {
+                display:none;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Google Maps GPS!</h1>
+        <a href="login.html" id="login">Log In!</a>
+        <p>Welcome to this Google Maps gps site. To see your details, please log in!</p>
+        <label class="startend" for="start">Start Location:</label>
+        <input type="text" id="start" name="start"><br><br>
+        <label class="startend" for="end">Destination:</label>
+        <input type="text" id="end" name="end"><br><br>
+
+        <label for="markr">Add Marker:</label>
+        <input type="text" id="markr" name="markr">
+        <button id="newQuestion" onclick="newQuestion()">Add</button>
+        <label id="add1" for="add2">Name of the marker:</label>
+        <input type="text" id="add2" name="name">
+        <button id="add3" onclick="marker()">Set!</button><br><br>
+
+        <button id="clacRoute" onclick="calcRoute()">Calculate Route!</button>
+        <div id="map"></div>
+        <div id="info"></div>
+        <div class="flex">
+            <input type="image" onclick="backText()" id="butt1" src="prev.png" alt="Previous Direction"/>
+            <div id="inst"></div>
+            <input type="image" onclick="frontText()" id="butt2" src="next.png" alt="Next Direction"/>
+        </div>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB91qWcIYdNFzt2Inwc3Zrmu5R1EuTfbuY"></script>
+        <script>
+            let map;
+            let geocoder;
+            key = 'AIzaSyB91qWcIYdNFzt2Inwc3Zrmu5R1EuTfbuY';
+            let directionsService = new google.maps.DirectionsService();
+            let directionsRenderer = new google.maps.DirectionsRenderer();
+            let result;
+            let duration;
+            let distance;
+            let inst = []
+            let c=0;
+            function showLocation(position) {
+                let lat = position.coords.latitude;
+                let lng = position.coords.longitude;
+                center = {lat: lat, lng: lng};
+                map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 15,
+                    center: center,
+                });
+                let marker = new google.maps.Marker({
+                    position: center,
+                    map: map,
+                    label:'C',
+                });
+                directionsRenderer.setMap(map);
+            };
+
+            function calcRoute() {
+                let start = document.getElementById('start').value;
+                let end = document.getElementById('end').value;
+                let request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: 'DRIVING'
+                };
+                directionsService.route(request, function(result, status) {
+                    if (status == 'OK') {
+                        directionsRenderer.setDirections(result);
+                        console.log(result);
+                        let steps = result.routes[0].legs[0].steps;
+                        inst = [];
+                        for (i=0;i<steps.length;i++) {
+                            inst.push(steps[i].instructions);
+                        }
+                        document.getElementById('inst').innerHTML = inst[0];
+                        document.getElementById('butt2').style.display = 'block';
+
+                        let duration = result.routes[0].legs[0].duration.text;
+                        let distance = result.routes[0].legs[0].distance.text;
+                        document.getElementById('info').innerHTML = 'Distance: ' + distance + '<br>Time: ' + duration;
+                    };
+                });
+            };
+            function errorHandler(err) {
+                if(err.code == 1) {
+                    alert("Error: Access is denied!");
+                } else if(err.code == 2) {
+                    alert("Error: Position is unavailable!");
+                }
+            };
+            function getLocation(){
+                if(navigator.geolocation){
+                    var options = {timeout:60000};
+                    navigator.geolocation.getCurrentPosition(showLocation, errorHandler, options);
+                } else{
+                    alert("Sorry, browser does not support geolocation!");
+                }
+            };
+            getLocation();
+            function frontText() {
+                c+=1;
+                document.getElementById('butt1').style.display = 'block';
+                document.getElementById('butt2').style.display = 'block';
+                document.getElementById('inst').innerHTML = inst[c];
+                if (c == (inst.length)-1) {
+                    document.getElementById('butt2').style.display = 'none';
+                }
+            };
+            function backText() {
+                c-=1;
+                document.getElementById('butt2').style.display = 'block';
+                document.getElementById('butt1').style.display = 'block';
+                document.getElementById('inst').innerHTML = inst[c];
+                if (c == 0) {
+                    document.getElementById('butt1').style.display = 'none';
+                }
+            };
+            function newQuestion() {
+                document.getElementById('add1').style.display = 'block';
+                document.getElementById('add2').style.display = 'block';
+                document.getElementById('add3').style.display = 'block';
+            };
+            function marker() {
+                loc = document.getElementById('markr').value;
+                name = document.getElementById('add2').value;
+                document.getElementById('add1').style.display = 'none';
+                document.getElementById('add2').style.display = 'none';
+                document.getElementById('add3').style.display = 'none';
+                addMarker(loc,name);
+            };
+            function addMarker(loc,name) {
+                const request = {
+                    address: loc
+                };
+                geocoder = new google.maps.Geocoder;
+                geocoder.geocode(request, function(results, status) {
+                    if (status == 'OK') {
+                        lat1 = results[0].geometry.viewport.Ab.h;
+                        lat2 = results[0].geometry.viewport.Ab.j;
+                        long1 = results[0].geometry.viewport.Ua.h;
+                        long2 = results[0].geometry.viewport.Ua.j;
+                        lat = (lat1+lat2)/2;
+                        long = (long1+long2)/2;
+                        center = {lat:lat,lng:long};
+                        const marker = new google.maps.Marker({
+                            position: center,
+                            map: map,
+                            label: name,
+                        })
+                    }
+                    else {
+                        alert("Sorry, we could not find that location: " + status);
+                    };
+                });
+            };
+        </script>
+    </body>
+</html>
